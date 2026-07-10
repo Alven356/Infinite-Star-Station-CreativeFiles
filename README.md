@@ -17,4 +17,4 @@ Infinite_star_final 使用截图
 
 Vocab_notebook 使用截图
 
-![Vocab 截图](previews/words test.png)
+![Vocab 截图](previews/words-test.png)
