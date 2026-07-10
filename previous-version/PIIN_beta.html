@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Inventory</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-strong: rgba(255, 255, 255, 0.13);
+      --text: #f4f1ea;
+      --muted: rgba(244, 241, 234, 0.62);
+      --line: rgba(255, 255, 255, 0.16);
+      --accent: #d7c18a;
+      --glow: rgba(215, 193, 138, 0.18);
+      --dominant: #111820;
+      --dominant-soft: rgba(17, 24, 32, 0.8);
+      --danger: #ff7b7b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    button, .file-label {
+      border: 0;
+      border-radius: 0;
+      color: var(--text);
+      background: transparent;
+      padding: 0;
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 160ms ease, color 160ms ease, transform 160ms ease;
+      user-select: none;
+      opacity: 0.68;
+      text-decoration: none;
+    }
+
+    button:hover, .file-label:hover {
+      opacity: 1;
+      color: #ffffff;
+      text-decoration: underline;
+      text-underline-offset: 5px;
+    }
+
+    button:active, .file-label:active {
+      transform: translateY(1px);
+      opacity: 0.82;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .screen.active { display: block; }
+
+    /* 沉浸观看页 */
+    #viewerScreen {
+      padding: 0;
+      background: var(--dominant);
+    }
+
+    .viewer {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 45%, transparent 0%, transparent 32%, rgba(0,0,0,0.14) 70%, rgba(0,0,0,0.46) 100%),
+        linear-gradient(135deg, var(--dominant), #05070a);
+      cursor: default;
+    }
+
+    .viewer::before {
+      content: "";
+      position: absolute;
+      inset: -6vw;
+      background-image: var(--current-image);
+      background-size: cover;
+      background-position: center;
+      filter: blur(48px) saturate(1.22) brightness(0.68);
+      transform: scale(1.12);
+      opacity: 0.9;
+      z-index: 0;
+    }
+
+    .viewer::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at center, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.08) 44%, rgba(0,0,0,0.45) 100%),
+        linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.36));
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .memory-card {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      animation: fadeIn 900ms ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(1.01); filter: blur(8px); }
+      to { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+
+    .image-frame {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+
+    .image-frame img {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      border-radius: 0;
+      box-shadow: none;
+      transition: transform 900ms ease, filter 900ms ease;
+      filter: saturate(1.02) contrast(1.02);
+    }
+
+    .viewer:hover .image-frame img {
+      transform: scale(1.012);
+      filter: saturate(1.08) contrast(1.04);
+    }
+
+    .caption-wrap {
+      position: absolute;
+      left: clamp(24px, 7vw, 96px);
+      bottom: clamp(34px, 9vh, 108px);
+      transform: none;
+      z-index: 3;
+      width: min(760px, calc(100vw - 52px));
+      text-align: left;
+      pointer-events: none;
+    }
+
+    .caption {
+      display: inline;
+      color: rgba(255,255,255,0.95);
+      font-size: clamp(20px, 2.7vw, 42px);
+      line-height: 1.42;
+      font-weight: 520;
+      letter-spacing: -0.02em;
+      text-shadow: 0 4px 28px rgba(0,0,0,0.78), 0 1px 3px rgba(0,0,0,0.82);
+    }
+
+    .viewer-actions {
+      position: fixed;
+      top: 22px;
+      right: 26px;
+      z-index: 7;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      opacity: 0.42;
+      transition: opacity 220ms ease;
+    }
+
+    .viewer-actions:hover {
+      opacity: 0.9;
+    }
+
+    .viewer-actions button {
+      color: rgba(255,255,255,0.82);
+      font-size: 13px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+    }
+
+    .viewer-hint {
+      position: fixed;
+      right: 24px;
+      bottom: 20px;
+      z-index: 7;
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 240ms ease;
+      pointer-events: none;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.55);
+    }
+
+    .viewer:hover .viewer-hint { opacity: 0.72; }
+
+    .empty {
+      position: relative;
+      z-index: 5;
+      margin: auto;
+      padding: 34px;
+      max-width: 620px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: rgba(255,255,255,0.09);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      text-align: center;
+      color: var(--muted);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.34);
+    }
+
+    .empty h1 {
+      margin: 0 0 10px;
+      color: var(--text);
+      font-size: 28px;
+      font-weight: 650;
+    }
+
+    /* 现代库存页 */
+    #adminScreen {
+      padding: 28px;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(215, 193, 138, 0.14), transparent 28%),
+        radial-gradient(circle at 88% 15%, rgba(126, 168, 255, 0.11), transparent 30%),
+        linear-gradient(180deg, #10141b 0%, #080b10 100%);
+    }
+
+    .admin-topbar {
+      max-width: 1160px;
+      margin: 0 auto 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      padding-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 720;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .admin-wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: 0 20px 70px rgba(0,0,0,0.28);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      padding: 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 16px;
+      font-size: 19px;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin: 14px 0 7px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border: 1px solid var(--line);
+      padding: 12px 13px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      border-radius: 16px;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: rgba(215, 193, 138, 0.55);
+      background: rgba(255,255,255,0.12);
+    }
+
+    textarea { min-height: 108px; resize: vertical; }
+    input[type="file"] { display: none; }
+
+    .form-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .thumb {
+      background: rgba(255,255,255,0.075);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 10px;
+      min-height: 256px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      overflow: hidden;
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+    }
+
+    .thumb:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.11);
+      border-color: rgba(255,255,255,0.26);
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      background: #090a0c;
+      border-radius: 15px;
+    }
+
+    .thumb-title {
+      font-size: 14px;
+      font-weight: 620;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .thumb-caption {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .thumb-actions {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .small {
+      padding: 0;
+      font-size: 12px;
+    }
+
+    .danger {
+      color: rgba(255, 190, 190, 0.82);
+    }
+
+    .hint {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 840px) {
+      #adminScreen { padding: 18px; }
+      .admin-wrap { grid-template-columns: 1fr; }
+      .admin-topbar { align-items: flex-start; flex-direction: column; }
+      .caption-wrap { bottom: 34px; }
+      .image-frame { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="viewerScreen" class="screen active">
+    <section class="viewer" id="viewer"></section>
+  </main>
+
+  <main id="adminScreen" class="screen">
+    <header class="admin-topbar">
+      <div class="brand">
+        <div class="brand-title">Memory Inventory</div>
+        <div class="brand-subtitle">把喜欢的图片保存成一个会呼吸的私人空间。</div>
+      </div>
+      <button id="viewBtn">进入观看页</button>
+    </header>
+
+    <div class="admin-wrap">
+      <section class="panel">
+        <h2>添加一张图片</h2>
+        <label class="file-label" for="imageInput">选择图片</label>
+        <input id="imageInput" type="file" accept="image/*" />
+
+        <label for="titleInput">标题 / 地点 / 当时的感觉</label>
+        <input id="titleInput" type="text" placeholder="例如：夜里的窗户 / 海底 / 旧电脑房间" />
+
+        <label for="captionInput">底下的一句话</label>
+        <textarea id="captionInput" placeholder="可以是你写的，也可以是别人写的。"></textarea>
+
+        <div class="form-actions">
+          <button id="addBtn">加入库存</button>
+          <button id="exportBtn">导出存档</button>
+          <label class="file-label" for="importInput">导入存档</label>
+          <input id="importInput" type="file" accept="application/json" />
+        </div>
+
+        <p class="hint">观看页主要靠图片氛围本身。图片自动每 8 分钟切换一次，也可以用键盘方向键手动切换。右上角只有轻量文字入口，不使用厚重按钮样式。</p>
+      </section>
+
+      <section class="panel">
+        <h2>所有收藏</h2>
+        <div id="gallery" class="grid"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "memoryInventory.v2";
+    let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem("memoryInventory.v1") || "[]");
+    let currentIndex = 0;
+    let pendingImage = "";
+    let timer = null;
+
+    const viewerScreen = document.getElementById("viewerScreen");
+    const adminScreen = document.getElementById("adminScreen");
+    const viewer = document.getElementById("viewer");
+    const gallery = document.getElementById("gallery");
+    const imageInput = document.getElementById("imageInput");
+    const titleInput = document.getElementById("titleInput");
+    const captionInput = document.getElementById("captionInput");
+    const importInput = document.getElementById("importInput");
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function showScreen(name) {
+      viewerScreen.classList.toggle("active", name === "viewer");
+      adminScreen.classList.toggle("active", name === "admin");
+      if (name === "viewer") startAutoPlay();
+      else stopAutoPlay();
+    }
+
+    function renderViewer() {
+      if (!items.length) {
+        viewer.style.setProperty("--current-image", "none");
+        viewer.innerHTML = `
+          <div class="empty">
+            <h1>还没有图片</h1>
+            <p>点击右上角隐藏区域进入库存页，加入第一张。之后这里会变成一个沉浸式的私人图片屏保。</p>
+          </div>
+          <div class="viewer-actions">
+            <button class="admin-text" aria-label="打开库存">库存</button>
+          </div>
+        `;
+        viewer.querySelector(".admin-text").addEventListener("click", () => showScreen("admin"));
+        return;
+      }
+
+      if (currentIndex >= items.length) currentIndex = 0;
+      if (currentIndex < 0) currentIndex = items.length - 1;
+      const item = items[currentIndex];
+      viewer.style.setProperty("--current-image", `url("${item.image}")`);
+
+      viewer.innerHTML = `
+        <article class="memory-card">
+          <div class="image-frame"><img id="mainImage" src="${item.image}" alt="${escapeHtml(item.title || "memory")}" /></div>
+          <div class="caption-wrap">
+            <div class="caption">${escapeHtml(item.caption || item.title || "")}</div>
+          </div>
+        </article>
+        <div class="viewer-actions">
+          <button class="admin-text" aria-label="打开库存">库存</button>
+        </div>
+        <div class="viewer-hint">← / → 切换 · 每 8 分钟自动更换</div>
+      `;
+
+      const img = viewer.querySelector("#mainImage");
+      img.addEventListener("load", () => setDominantColor(img));
+      if (img.complete) setDominantColor(img);
+      viewer.querySelector(".admin-text").addEventListener("click", () => showScreen("admin"));
+    }
+
+    function setDominantColor(img) {
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        const size = 24;
+        canvas.width = size;
+        canvas.height = size;
+        ctx.drawImage(img, 0, 0, size, size);
+        const data = ctx.getImageData(0, 0, size, size).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 16) {
+          const alpha = data[i + 3];
+          if (alpha < 80) continue;
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+        if (!count) return;
+        r = Math.round(r / count);
+        g = Math.round(g / count);
+        b = Math.round(b / count);
+        viewer.style.setProperty("--dominant", `rgb(${Math.max(6, r * 0.45)}, ${Math.max(7, g * 0.45)}, ${Math.max(10, b * 0.45)})`);
+        viewer.style.background = `radial-gradient(circle at 50% 45%, rgba(${r},${g},${b},0.18), rgba(${Math.round(r*0.35)},${Math.round(g*0.35)},${Math.round(b*0.35)},1) 78%, #030406 100%)`;
+      } catch {
+        viewer.style.background = "linear-gradient(135deg, var(--dominant), #05070a)";
+      }
+    }
+
+    function renderGallery() {
+      gallery.innerHTML = "";
+      if (!items.length) {
+        gallery.innerHTML = `<p class="hint">这里会罗列所有你喜欢的图片。</p>`;
+        return;
+      }
+
+      items.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "thumb";
+        card.innerHTML = `
+          <img src="${item.image}" alt="${escapeHtml(item.title || "memory")}" />
+          <div class="thumb-title">${escapeHtml(item.title || "untitled")}</div>
+          <div class="thumb-caption">${escapeHtml(item.caption || "")}</div>
+          <div class="thumb-actions">
+            <button class="small" data-view="${index}">查看</button>
+            <button class="small danger" data-delete="${index}">删除</button>
+          </div>
+        `;
+        gallery.appendChild(card);
+      });
+    }
+
+    function next() {
+      if (!items.length) return;
+      currentIndex = (currentIndex + 1) % items.length;
+      renderViewer();
+    }
+
+    function prev() {
+      if (!items.length) return;
+      currentIndex = (currentIndex - 1 + items.length) % items.length;
+      renderViewer();
+    }
+
+    function startAutoPlay() {
+      stopAutoPlay();
+      timer = setInterval(next, 8 * 60 * 1000);
+    }
+
+    function stopAutoPlay() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { pendingImage = reader.result; };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("addBtn").addEventListener("click", () => {
+      if (!pendingImage) {
+        alert("先选择一张图片。");
+        return;
+      }
+      items.unshift({
+        image: pendingImage,
+        title: titleInput.value.trim(),
+        caption: captionInput.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+      pendingImage = "";
+      imageInput.value = "";
+      titleInput.value = "";
+      captionInput.value = "";
+      currentIndex = 0;
+      save();
+      renderGallery();
+      renderViewer();
+    });
+
+    gallery.addEventListener("click", (event) => {
+      const viewIndex = event.target.dataset.view;
+      const deleteIndex = event.target.dataset.delete;
+
+      if (viewIndex !== undefined) {
+        currentIndex = Number(viewIndex);
+        renderViewer();
+        showScreen("viewer");
+      }
+
+      if (deleteIndex !== undefined) {
+        if (!confirm("确定删除这一张吗？")) return;
+        items.splice(Number(deleteIndex), 1);
+        if (currentIndex >= items.length) currentIndex = 0;
+        save();
+        renderGallery();
+        renderViewer();
+      }
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "memory-inventory.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    importInput.addEventListener("change", () => {
+      const file = importInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(reader.result);
+          if (!Array.isArray(imported)) throw new Error("bad file");
+          items = imported;
+          currentIndex = 0;
+          save();
+          renderGallery();
+          renderViewer();
+        } catch {
+          alert("这个存档文件好像不对。");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById("viewBtn").addEventListener("click", () => showScreen("viewer"));
+
+    document.addEventListener("keydown", (event) => {
+      if (adminScreen.classList.contains("active")) return;
+      if (event.key === "ArrowRight") { next(); startAutoPlay(); }
+      if (event.key === "ArrowLeft") { prev(); startAutoPlay(); }
+      if (event.key.toLowerCase() === "i") showScreen("admin");
+    });
+
+    renderGallery();
+    renderViewer();
+    startAutoPlay();
+  </script>
+</body>
+</html>
