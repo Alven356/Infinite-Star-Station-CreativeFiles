@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>信息投递箱 · 便签墙</title>
+<style>
+:root{
+  --bg:#f4f4f1;
+  --paper:#ffffff;
+  --paper-2:#fafaf7;
+  --ink:#222;
+  --muted:#777;
+  --line:#d8d8d1;
+  --line-dark:#babaae;
+  --grid:#e5e5df;
+  --hover:#eeeeea;
+  --link:#2d5f90;
+  --danger:#9b3a32;
+  --bubble:#ffffff;
+  --bubble-border:#c9c9c1;
+  --sidebar:300px;
+  --inbox:270px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+}
+.app{
+  height:100vh;
+  display:grid;
+  grid-template-columns:1fr var(--sidebar);
+  grid-template-rows:1fr var(--inbox);
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+}
+.wall{
+  position:relative;
+  overflow:auto;
+  padding:24px;
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    var(--bg);
+  background-size:42px 42px;
+}
+.notes-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+  gap:20px;
+  align-items:start;
+  padding-bottom:40px;
+}
+.note{
+  position:relative;
+  background:var(--paper);
+  border:1px solid var(--line-dark);
+  min-height:170px;
+  box-shadow:0 2px 0 rgba(0,0,0,.03);
+}
+.note textarea{
+  display:block;
+  width:100%;
+  min-height:170px;
+  height:auto;
+  border:0;
+  border-radius:0;
+  resize:vertical;
+  padding:16px 16px 38px;
+  outline:none;
+  font:inherit;
+  line-height:1.62;
+  font-size:15.5px;
+  background:transparent;
+  color:var(--ink);
+  overflow:hidden;
+}
+.note:focus-within{
+  border-color:#333;
+  box-shadow:0 0 0 2px rgba(0,0,0,.05);
+}
+.note-hint{
+  position:absolute;
+  right:8px;
+  bottom:8px;
+  color:#aaa;
+  font-size:12px;
+  pointer-events:none;
+}
+.add-note{
+  border:1px dashed var(--line-dark);
+  background:rgba(255,255,255,.55);
+  min-height:170px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:#777;
+  font-size:14px;
+}
+.add-note:hover{background:var(--paper);}
+.links{
+  grid-row:1 / 3;
+  grid-column:2;
+  border-left:1px solid var(--line-dark);
+  background:var(--paper-2);
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+}
+.side-head{
+  padding:15px 14px 11px;
+  border-bottom:1px solid var(--line);
+  font-size:13px;
+  color:#555;
+  letter-spacing:.04em;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.side-head small{
+  color:#999;
+  letter-spacing:0;
+  font-size:12px;
+}
+.link-list{
+  padding:13px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.link-card{
+  position:relative;
+  display:block;
+  text-decoration:none;
+  color:var(--ink);
+  background:var(--paper);
+  border:1px solid var(--line-dark);
+  padding:13px 36px 13px 13px;
+  line-height:1.38;
+  word-break:break-word;
+  box-shadow:0 2px 0 rgba(0,0,0,.035);
+}
+.link-card:hover{background:#f7f7f3;}
+.link-card b{
+  display:block;
+  color:var(--link);
+  font-size:15px;
+  font-weight:650;
+  margin-bottom:6px;
+}
+.link-card span{
+  display:block;
+  color:#555;
+  font-size:12.5px;
+  max-height:34px;
+  overflow:hidden;
+}
+.link-card em{
+  display:block;
+  font-style:normal;
+  color:#999;
+  font-size:11.5px;
+  margin-top:7px;
+}
+.link-del{
+  position:absolute;
+  right:6px;
+  top:6px;
+  border:1px solid transparent;
+  background:transparent;
+  color:#999;
+  cursor:pointer;
+  padding:3px 7px;
+  font-size:14px;
+  display:none;
+}
+.link-card-wrap:hover .link-del{display:block}
+.link-del:hover{color:var(--danger); border-color:#e0c4bf; background:#fff5f3;}
+.resize-bar{
+  grid-column:1;
+  grid-row:2;
+  height:8px;
+  background:#deded7;
+  border-top:1px solid var(--line-dark);
+  border-bottom:1px solid var(--line);
+  cursor:ns-resize;
+  transform:translateY(-100%);
+  z-index:10;
+}
+.inbox{
+  grid-column:1;
+  grid-row:2;
+  border-top:1px solid var(--line-dark);
+  background:#f7f7f3;
+  display:grid;
+  grid-template-columns:360px 1fr;
+  min-height:0;
+}
+.composer{
+  padding:13px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  background:#fff;
+  border-right:1px solid var(--line);
+}
+.composer textarea{
+  width:100%;
+  height:100%;
+  min-height:132px;
+  resize:none;
+  border:1px solid var(--line-dark);
+  border-radius:0;
+  padding:11px;
+  outline:none;
+  font:inherit;
+  line-height:1.5;
+  background:#fff;
+}
+.composer textarea:focus{border-color:#333;}
+.messages{
+  overflow:auto;
+  padding:16px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.message-row{
+  display:flex;
+  justify-content:flex-start;
+  width:100%;
+}
+.message{
+  position:relative;
+  max-width:min(720px, 86%);
+  background:var(--bubble);
+  border:1px solid var(--bubble-border);
+  padding:10px 13px;
+  white-space:pre-wrap;
+  line-height:1.5;
+  font-size:14.5px;
+  box-shadow:0 2px 0 rgba(0,0,0,.045);
+  word-break:break-word;
+}
+.message::after{
+  content:"";
+  position:absolute;
+  left:-8px;
+  top:14px;
+  border-width:6px 8px 6px 0;
+  border-style:solid;
+  border-color:transparent var(--bubble-border) transparent transparent;
+}
+.message::before{
+  content:"";
+  position:absolute;
+  left:-6px;
+  top:15px;
+  border-width:5px 7px 5px 0;
+  border-style:solid;
+  border-color:transparent var(--bubble) transparent transparent;
+  z-index:2;
+}
+.message a{
+  color:#174f82;
+  text-decoration:none;
+  word-break:break-word;
+  font-weight:500;
+}
+.message a:hover{text-decoration:underline;}
+.message.link-only{
+  background:#fff;
+  border-color:#aebfd0;
+  padding:0;
+  overflow:hidden;
+  max-width:min(430px, 72%);
+}
+.message.link-only::before{border-color:transparent #fff transparent transparent;}
+.message.link-only::after{border-color:transparent #aebfd0 transparent transparent;}
+.msg-link-card{
+  display:block;
+  padding:11px 13px;
+  text-decoration:none!important;
+  color:var(--ink)!important;
+  min-width:210px;
+}
+.msg-link-card b{
+  display:block;
+  color:var(--link);
+  font-size:14.5px;
+  margin-bottom:4px;
+}
+.msg-link-card span{
+  display:block;
+  color:#666;
+  font-size:12px;
+  font-weight:400;
+  max-height:18px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.msg-time{
+  margin-top:6px;
+  color:#999;
+  font-size:11px;
+  text-align:right;
+}
+.context-menu{
+  position:fixed;
+  z-index:9999;
+  background:#fff;
+  border:1px solid #aaa;
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+  min-width:120px;
+  display:none;
+}
+.context-menu button{
+  display:block;
+  width:100%;
+  border:0;
+  background:#fff;
+  text-align:left;
+  padding:9px 12px;
+  cursor:pointer;
+  color:#333;
+  font:inherit;
+  font-size:13px;
+}
+.context-menu button:hover{
+  background:#f1f1ec;
+}
+.context-menu .danger{color:var(--danger);}
+.row{
+  display:flex;
+  gap:8px;
+}
+button.main{
+  border:1px solid #333;
+  background:#222;
+  color:white;
+  border-radius:0;
+  padding:8px 15px;
+  cursor:pointer;
+  font:inherit;
+}
+button.secondary{
+  border:1px solid var(--line-dark);
+  background:#fff;
+  color:#333;
+  border-radius:0;
+  padding:8px 12px;
+  cursor:pointer;
+  font:inherit;
+}
+button:hover{filter:brightness(.96);}
+.empty{
+  color:#999;
+  font-size:13px;
+  padding:4px 2px;
+}
+.hint{
+  color:#777;
+  font-size:12px;
+  line-height:1.45;
+}
+@media (max-width:880px){
+  body{overflow:auto;height:auto;}
+  .app{
+    min-height:100vh;
+    height:auto;
+    display:block;
+  }
+  .wall{min-height:58vh;}
+  .links{
+    border-left:0;
+    border-top:1px solid var(--line-dark);
+    max-height:280px;
+  }
+  .resize-bar{display:none;}
+  .inbox{
+    display:block;
+    border-top:1px solid var(--line-dark);
+  }
+  .composer{
+    border-right:0;
+    border-bottom:1px solid var(--line);
+  }
+  .composer textarea{min-height:120px;}
+  .messages{max-height:340px;}
+  .notes-grid{grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <main class="wall">
+    <div class="notes-grid" id="notesGrid"></div>
+  </main>
+
+  <aside class="links">
+    <div class="side-head"><span>LINKS</span><small>右键删除</small></div>
+    <div class="link-list" id="linkList"></div>
+  </aside>
+
+  <div class="resize-bar" id="resizeBar" title="拖动调整消息栏高度"></div>
+
+  <section class="inbox">
+    <div class="composer">
+      <textarea id="input" placeholder="像微信一样，把任何东西丢进来。Ctrl/⌘ + Enter 发送。"></textarea>
+      <div class="row">
+        <button class="main" id="sendBtn">发送</button>
+        <button class="secondary" id="newNoteBtn">新便签</button>
+      </div>
+      <div class="hint">左边输入，右边消息。旧消息在上，新消息在下。消息/便签/链接右键删除。</div>
+    </div>
+    <div class="messages" id="messages"></div>
+  </section>
+</div>
+
+<div class="context-menu" id="contextMenu">
+  <button class="danger" id="deleteTarget">删除</button>
+</div>
+
+<script>
+const storeKey = "flat_note_wall_v3";
+
+// 兼容旧版数据
+let prev = JSON.parse(localStorage.getItem("flat_note_wall_v2") || "null")
+        || JSON.parse(localStorage.getItem("flat_note_wall_v1") || "null");
+
+let state = JSON.parse(localStorage.getItem(storeKey) || "null") || prev || {
+  notes: [
+    { id: crypto.randomUUID(), text: "SAT\n\n" },
+    { id: crypto.randomUUID(), text: "数学\n\n" },
+    { id: crypto.randomUUID(), text: "英语\n\n" },
+    { id: crypto.randomUUID(), text: "妈妈给的信息\n\n" }
+  ],
+  messages: [],
+  links: [],
+  inboxHeight: 270
+};
+
+if(!state.inboxHeight) state.inboxHeight = 270;
+
+const app = document.getElementById("app");
+const notesGrid = document.getElementById("notesGrid");
+const messagesEl = document.getElementById("messages");
+const linkList = document.getElementById("linkList");
+const input = document.getElementById("input");
+const contextMenu = document.getElementById("contextMenu");
+let contextAction = null;
+
+function save(){
+  localStorage.setItem(storeKey, JSON.stringify(state));
+}
+
+function applyLayout(){
+  app.style.gridTemplateRows = `1fr ${state.inboxHeight}px`;
+}
+applyLayout();
+
+function autoResizeTextarea(el){
+  el.style.height = "auto";
+  el.style.height = Math.max(170, el.scrollHeight) + "px";
+}
+
+function isSingleLink(text){
+  const t = text.trim();
+  return /^https?:\/\/[^\s]+$/i.test(t);
+}
+
+function extractLinks(text){
+  return text.match(/https?:\/\/[^\s]+/gi) || [];
+}
+
+function getHost(url){
+  try{
+    return new URL(url).hostname.replace(/^www\./,"");
+  }catch(e){
+    return url;
+  }
+}
+
+function getPathInfo(url){
+  try{
+    const u = new URL(url);
+    const path = (u.pathname || "/").replace(/\/$/,"");
+    return path && path !== "" ? path.slice(0, 70) : "首页 / root";
+  }catch(e){
+    return "";
+  }
+}
+
+function addLink(url){
+  const normalized = url.trim();
+  if(!state.links.some(l => l.url === normalized)){
+    state.links.unshift({
+      id: crypto.randomUUID(),
+      url: normalized,
+      host: getHost(normalized),
+      path: getPathInfo(normalized),
+      created: Date.now()
+    });
+  }
+}
+
+function formatTime(ts){
+  if(!ts) return "";
+  const d = new Date(ts);
+  return d.toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  }[m]));
+}
+
+function linkify(text){
+  return text.replace(/https?:\/\/[^\s]+/gi, url => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+}
+
+function openContextMenu(x, y, action){
+  contextAction = action;
+  contextMenu.style.left = x + "px";
+  contextMenu.style.top = y + "px";
+  contextMenu.style.display = "block";
+}
+
+function closeContextMenu(){
+  contextMenu.style.display = "none";
+  contextAction = null;
+}
+
+document.addEventListener("click", closeContextMenu);
+document.getElementById("deleteTarget").addEventListener("click", () => {
+  if(contextAction) contextAction();
+  closeContextMenu();
+});
+
+function renderNotes(){
+  notesGrid.innerHTML = "";
+  state.notes.forEach(note => {
+    const wrap = document.createElement("div");
+    wrap.className = "note";
+    wrap.addEventListener("contextmenu", e => {
+      e.preventDefault();
+      openContextMenu(e.clientX, e.clientY, () => {
+        state.notes = state.notes.filter(n => n.id !== note.id);
+        save();
+        renderNotes();
+      });
+    });
+
+    const ta = document.createElement("textarea");
+    ta.placeholder = "写点什么…";
+    ta.spellcheck = false;
+    ta.value = note.text || "";
+    ta.addEventListener("input", () => {
+      note.text = ta.value;
+      autoResizeTextarea(ta);
+      save();
+    });
+
+    const hint = document.createElement("div");
+    hint.className = "note-hint";
+    hint.textContent = "右键删";
+
+    wrap.appendChild(ta);
+    wrap.appendChild(hint);
+    notesGrid.appendChild(wrap);
+    requestAnimationFrame(() => autoResizeTextarea(ta));
+  });
+
+  const add = document.createElement("div");
+  add.className = "add-note";
+  add.textContent = "+ 新便签";
+  add.addEventListener("click", () => createNote());
+  notesGrid.appendChild(add);
+}
+
+function createNote(){
+  const note = { id: crypto.randomUUID(), text: "" };
+  state.notes.push(note);
+  save();
+  renderNotes();
+  setTimeout(() => {
+    const textareas = notesGrid.querySelectorAll(".note textarea");
+    const last = textareas[textareas.length - 1];
+    if(last) last.focus();
+  }, 0);
+}
+
+function renderMessages(){
+  messagesEl.innerHTML = "";
+  if(state.messages.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "投递箱还没有消息。";
+    messagesEl.appendChild(empty);
+    return;
+  }
+
+  const sorted = [...state.messages].sort((a,b)=>(a.created || 0)-(b.created || 0));
+  sorted.forEach(msg => {
+    const row = document.createElement("div");
+    row.className = "message-row";
+
+    const el = document.createElement("div");
+    el.className = "message" + (msg.linkOnly ? " link-only" : "");
+    if(msg.linkOnly){
+      el.innerHTML = `
+        <a class="msg-link-card" href="${escapeHtml(msg.text)}" target="_blank" rel="noopener noreferrer">
+          <b>${escapeHtml(getHost(msg.text))}</b>
+          <span>${escapeHtml(msg.text)}</span>
+          <div class="msg-time">${formatTime(msg.created)}</div>
+        </a>`;
+    }else{
+      el.innerHTML = `${linkify(escapeHtml(msg.text))}<div class="msg-time">${formatTime(msg.created)}</div>`;
+    }
+
+    el.addEventListener("contextmenu", e => {
+      e.preventDefault();
+      openContextMenu(e.clientX, e.clientY, () => {
+        state.messages = state.messages.filter(m => m.id !== msg.id);
+        save();
+        renderMessages();
+      });
+    });
+
+    row.appendChild(el);
+    messagesEl.appendChild(row);
+  });
+
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function renderLinks(){
+  linkList.innerHTML = "";
+  if(state.links.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "检测到链接后会出现在这里。";
+    linkList.appendChild(empty);
+    return;
+  }
+
+  state.links.forEach(link => {
+    const wrap = document.createElement("div");
+    wrap.className = "link-card-wrap";
+    wrap.style.position = "relative";
+
+    const a = document.createElement("a");
+    a.className = "link-card";
+    a.href = link.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.innerHTML = `
+      <b>${escapeHtml(link.host || getHost(link.url))}</b>
+      <span>${escapeHtml(link.url)}</span>
+      <em>${escapeHtml(link.path || getPathInfo(link.url))}</em>`;
+
+    a.addEventListener("contextmenu", e => {
+      e.preventDefault();
+      openContextMenu(e.clientX, e.clientY, () => {
+        state.links = state.links.filter(l => l.id !== link.id);
+        save();
+        renderLinks();
+      });
+    });
+
+    const del = document.createElement("button");
+    del.className = "link-del";
+    del.textContent = "×";
+    del.title = "删除链接";
+    del.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      state.links = state.links.filter(l => l.id !== link.id);
+      save();
+      renderLinks();
+    });
+
+    wrap.appendChild(a);
+    wrap.appendChild(del);
+    linkList.appendChild(wrap);
+  });
+}
+
+function send(){
+  const text = input.value.trim();
+  if(!text) return;
+
+  extractLinks(text).forEach(addLink);
+
+  state.messages.push({
+    id: crypto.randomUUID(),
+    text,
+    linkOnly: isSingleLink(text),
+    created: Date.now()
+  });
+
+  input.value = "";
+  save();
+  renderMessages();
+  renderLinks();
+}
+
+document.getElementById("sendBtn").addEventListener("click", send);
+document.getElementById("newNoteBtn").addEventListener("click", createNote);
+input.addEventListener("keydown", e => {
+  if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){
+    e.preventDefault();
+    send();
+  }
+});
+
+const resizeBar = document.getElementById("resizeBar");
+let resizing = false;
+resizeBar.addEventListener("mousedown", () => {
+  resizing = true;
+  document.body.style.userSelect = "none";
+});
+window.addEventListener("mousemove", e => {
+  if(!resizing) return;
+  const h = Math.min(Math.max(window.innerHeight - e.clientY, 190), Math.floor(window.innerHeight * 0.72));
+  state.inboxHeight = h;
+  applyLayout();
+});
+window.addEventListener("mouseup", () => {
+  if(resizing){
+    resizing = false;
+    document.body.style.userSelect = "";
+    save();
+  }
+});
+
+renderNotes();
+renderMessages();
+renderLinks();
+</script>
+</body>
+</html>
