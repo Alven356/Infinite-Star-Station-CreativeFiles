@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新版本 · Infinite Star Station</title>
+  <style>
+    :root{
+      --bg-image:url("background.jpg");--text:#edf3f8;--muted:#aab6c2;
+      --line:rgba(255,255,255,.10);--panel:rgba(9,14,22,.58);--accent:#c8d9e8
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#070a0f}
+    body::before{content:"";position:fixed;inset:-28px;z-index:-3;background:linear-gradient(180deg,rgba(3,7,12,.18),rgba(3,6,11,.78)),var(--bg-image) center/cover no-repeat;filter:blur(18px) saturate(.78) brightness(.68);transform:scale(1.08)}
+    body::after{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 50% 0%,rgba(178,211,236,.16),transparent 34%)}
+    a{color:inherit}.shell{width:min(1180px,calc(100% - 32px));margin:auto}
+    .topbar{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);background:rgba(7,10,15,.52);backdrop-filter:blur(22px)}
+    .topbar-inner{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{font-size:.9rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none}
+    .back{color:var(--muted);font-size:.88rem;text-decoration:none}
+    .intro{padding:92px 0 44px;animation:fadeUp .8s ease both}
+    .eyebrow{margin:0 0 12px;color:var(--muted);font-size:.74rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+    h1{margin:0;font-size:clamp(2.7rem,6vw,5.5rem);letter-spacing:-.055em}
+    .intro>p:last-child{max-width:680px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:12px 0 76px}
+    .card{overflow:hidden;border:1px solid var(--line);border-radius:22px;background:var(--panel);backdrop-filter:blur(18px);animation:fadeUp .8s ease both}
+    .card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.16s}.card:nth-child(4){animation-delay:.24s}
+    .preview{display:block;aspect-ratio:16/9;overflow:hidden;border-bottom:1px solid var(--line)}
+    .preview img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease,filter .4s ease;filter:saturate(.85) brightness(.82)}
+    .card:hover img{transform:scale(1.035);filter:saturate(1) brightness(.92)}
+    .content{padding:22px}
+    .content small{color:#738294;letter-spacing:.13em;text-transform:uppercase}
+    .content h2{margin:9px 0 10px;font-size:1.45rem}
+    .content p{min-height:3.2em;margin:0 0 18px;color:var(--muted);font-size:.93rem}
+    .content a{color:var(--accent);font-size:.9rem;font-weight:700;text-decoration:none}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:780px){.grid{grid-template-columns:1fr}.topbar-inner{min-height:60px}}
+  </style>
+</head>
+<body>
+<header class="topbar"><div class="shell topbar-inner"><a class="brand" href="index.html">Infinite Star Station</a><a class="back" href="index.html">← 返回主页</a></div></header>
+<main class="shell">
+  <section class="intro">
+    <p class="eyebrow">Current Projects</p>
+    <h1>新版本</h1>
+    <p>目前主要展示和维护的网页作品。每一个项目都保留自己的界面和使用方式。</p>
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <a class="preview" href="PIIN_final/index.html"><img src="previews/picture.png" alt="PIIN Final"></a>
+      <div class="content"><small>Image Archive</small><h2>PIIN Final</h2><p>收藏图片、记录想法、整理时间线，并保存每张图片的故事。</p><a href="PIIN_final/index.html">打开项目 →</a></div>
+    </article>
+
+    <article class="card">
+      <a class="preview" href="infinite_star_final/index.html"><img src="previews/infinite_star_station.png" alt="Infinite Star Final"></a>
+      <div class="content"><small>Browser Homepage</small><h2>Infinite Star Final</h2><p>受到 Linux 与 macOS 启发的浏览器主页与桌面体验。</p><a href="infinite_star_final/index.html">打开项目 →</a></div>
+    </article>
+
+    <article class="card">
+      <a class="preview" href="vocab_notebook_final/index.html"><img src="previews/words-test.png" alt="Vocab Notebook Final"></a>
+      <div class="content"><small>Learning Tool</small><h2>Vocab Notebook Final</h2><p>带有词库、测试、排序和错题本的本地单词学习工具。</p><a href="vocab_notebook_final/index.html">打开项目 →</a></div>
+    </article>
+
+    <article class="card">
+      <a class="preview" href="flat_note_wall_inbox/index.html"><img src="previews/flat_note_book.png" alt="Flat Note Wall Inbox"></a>
+      <div class="content"><small>Notes & Inbox</small><h2>Flat Note Wall Inbox</h2><p>便签墙、聊天式记录仪与链接收集器组成的信息空间。</p><a href="flat_note_wall_inbox/index.html">打开项目 →</a></div>
+    </article>
+  </section>
+</main>
+</body>
+</html>

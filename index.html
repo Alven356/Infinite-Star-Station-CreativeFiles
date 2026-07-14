@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinite Star Station</title>
+  <style>
+    :root{
+      --bg-image:url("background.jpg");
+      --panel:rgba(11,16,24,.58);
+      --panel-strong:rgba(10,14,21,.76);
+      --line:rgba(255,255,255,.10);
+      --text:#edf3f8;
+      --muted:#aab6c2;
+      --soft:#718092;
+      --accent:#c9d9e8;
+      --shadow:0 24px 70px rgba(0,0,0,.38);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      font-family:Inter,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+      background:#070a0f;
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-28px;
+      z-index:-3;
+      background:
+        linear-gradient(180deg,rgba(4,8,14,.20),rgba(3,6,11,.72)),
+        var(--bg-image) center/cover no-repeat;
+      filter:blur(18px) saturate(.78) brightness(.72);
+      transform:scale(1.08);
+    }
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-2;
+      background:
+        radial-gradient(circle at 50% 8%,rgba(170,205,230,.16),transparent 32%),
+        linear-gradient(180deg,rgba(8,13,21,.06),rgba(4,7,12,.76) 82%);
+      pointer-events:none;
+    }
+    a{color:inherit}
+    .shell{width:min(1180px,calc(100% - 32px));margin:auto}
+    .topbar{
+      position:sticky;top:0;z-index:20;
+      border-bottom:1px solid var(--line);
+      background:rgba(7,10,15,.52);
+      backdrop-filter:blur(22px);
+    }
+    .topbar-inner{
+      min-height:68px;
+      display:flex;align-items:center;justify-content:space-between;gap:24px
+    }
+    .brand{
+      font-size:.92rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none
+    }
+    .nav{display:flex;gap:12px;flex-wrap:wrap}
+    .nav a{
+      padding:8px 13px;border-radius:999px;color:var(--muted);font-size:.88rem;text-decoration:none;
+      transition:background .2s ease,color .2s ease,transform .2s ease
+    }
+    .nav a:hover{color:var(--text);background:rgba(255,255,255,.07);transform:translateY(-1px)}
+    .hero{
+      min-height:calc(100vh - 68px);
+      display:flex;flex-direction:column;justify-content:center;
+      padding:88px 0 72px;
+      animation:fadeUp .9s ease both;
+    }
+    .eyebrow{
+      margin:0 0 18px;color:var(--muted);font-size:.74rem;font-weight:700;
+      letter-spacing:.22em;text-transform:uppercase
+    }
+    h1{
+      max-width:850px;margin:0;
+      font-size:clamp(3.2rem,8vw,7rem);
+      line-height:.95;letter-spacing:-.06em;
+      text-shadow:0 8px 28px rgba(0,0,0,.35)
+    }
+    .hero p:not(.eyebrow){
+      max-width:690px;margin:28px 0 0;color:var(--muted);
+      font-size:clamp(1rem,2vw,1.18rem)
+    }
+    .portal-grid{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:42px
+    }
+    .portal{
+      position:relative;overflow:hidden;
+      min-height:220px;padding:28px;
+      border:1px solid var(--line);border-radius:24px;
+      background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.022));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+      text-decoration:none;
+      transition:transform .25s ease,border-color .25s ease,background .25s ease
+    }
+    .portal::after{
+      content:"";
+      position:absolute;inset:auto -10% -45% 24%;
+      height:70%;
+      background:radial-gradient(circle,rgba(180,215,238,.18),transparent 62%);
+      filter:blur(8px)
+    }
+    .portal:hover{
+      transform:translateY(-6px);
+      border-color:rgba(255,255,255,.22);
+      background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.032))
+    }
+    .portal small{color:var(--soft);letter-spacing:.16em;text-transform:uppercase}
+    .portal h2{margin:14px 0 10px;font-size:2rem;letter-spacing:-.035em}
+    .portal p{max-width:470px;margin:0;color:var(--muted);font-size:.95rem}
+    .portal span{
+      position:absolute;left:28px;bottom:24px;color:var(--accent);font-size:.88rem;font-weight:700
+    }
+    footer{
+      padding:24px 0 40px;color:var(--soft);font-size:.82rem
+    }
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    @media(max-width:760px){
+      .portal-grid{grid-template-columns:1fr}
+      .topbar-inner{padding:14px 0;align-items:flex-start;flex-direction:column}
+      .hero{min-height:auto}
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a class="brand" href="index.html">Infinite Star Station</a>
+    <nav class="nav">
+      <a href="new.html">新版本</a>
+      <a href="archive.html">旧版本</a>
+      <a href="README.md">README</a>
+    </nav>
+  </div>
+</header>
+
+<main class="shell">
+  <section class="hero">
+    <p class="eyebrow">Creative Files Archive</p>
+    <h1>漂浮在夜色与天空之间的作品档案。</h1>
+    <p>这里收录正在维护的新版本，也保留过去留下的旧版本与时间痕迹。界面尽量保持空、静、遥远，像一座没有人的观测站。</p>
+
+    <div class="portal-grid">
+      <a class="portal" href="new.html">
+        <small>Current</small>
+        <h2>新版本</h2>
+        <p>进入目前主要展示与维护的网页作品。</p>
+        <span>进入页面 →</span>
+      </a>
+
+      <a class="portal" href="archive.html">
+        <small>Archive</small>
+        <h2>旧版本</h2>
+        <p>按照时间戳查看过去的文件与早期实验。</p>
+        <span>进入档案 →</span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer><div class="shell">Infinite Star Station Creative Files · Alven</div></footer>
+</body>
+</html>
