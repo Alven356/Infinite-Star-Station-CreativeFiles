@@ -116,4 +116,7 @@ Vocab_notebook 使用截图
 
 ![Vocab 截图](previews/words-test.png)
 
+flat_note_wall_inbox 使用截图
+
+![Vocab 截图](previews/flat_note_book.png)
 
