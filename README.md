@@ -1,52 +1,109 @@
-
 # Infinite Star Station Creative Files
 
-> 存储一些我的创意文件，也是 **Infinite Star Station（永恒寒星）** 网站的附属作品。  
-> 这些项目大多诞生于日常灵感，并持续作为个人创意实验进行维护。
+> A collection of personal creative web projects and interface experiments.
+
+存储一些我的创意网页作品，也是 **Infinite Star Station（永恒寒星）** 的附属项目。
+
+这里的大部分作品都来源于日常灵感，围绕着桌面体验、图片收藏、学习工具以及信息整理展开。我更希望它们像一个不断成长的创意实验室，而不是一组独立的软件。
 
 ---
 
-## 项目
+## Projects
 
-| 项目 | 简介 |
-|------|------|
-| PIIN Final | 图片图库查看器 |
-| Infinite Star Final | 仿 Linux / macOS 浏览器主页 |
-| Vocab Notebook Final | 单词测试软件 |
-| Flat Note Wall Inbox | 便签墙与聊天记录工具 |
+| Project | Description |
+|---------|-------------|
+| **PIIN Final** | 图片收藏与图库查看器 |
+| **Infinite Star Final** | 仿 Linux / macOS 浏览器主页 |
+| **Vocab Notebook Final** | 单词学习与测试工具 |
+| **Flat Note Wall Inbox** | 便签、聊天记录与链接收集 |
 
 ---
 
-## 注意事项
+## Notes
 
-> [!WARNING]
+> [!NOTE]
 >
-> - 代码仍然处于实验阶段。
-> - 请勿将 CSS 与 HTML 分离。
-> - 当前项目建议本地使用，不建议直接部署到服务器。
+> - 所有项目均为个人创意作品。
+> - 数据主要保存在 **Local Storage**。
+> - 当前建议本地使用，不建议直接部署到服务器。
+> - 项目仍在持续更新与完善。
 
 ---
 
 # PIIN Final
 
-图片图库查看器。
+一个用于收藏图片与记录灵感的本地图片图库。
 
-### 功能
+除了保存图片本身，它更像一本可以不断补充内容的数字相册。每张图片都可以记录标题、当时的想法，以及一段属于它自己的故事。
 
-- 上传图片到图库
-- 为图片记录标题、想法与说明
-- 自动按照时间排序
-- 为每张图片撰写专属故事
-- 根据图片整体色调自动调整页面主题
+### Features
 
-> 所有数据保存在 Local Storage。
+- 图片收藏与浏览
+- 自动按年月整理图片
+- 图片标题与备注
+- 图片故事记录
+- 根据图片色调自动调整页面主题
+- Local Storage 数据存储
 
-![PIIN](previews/picture.png)
+![PIIN Screenshot](previews/picture.png)
 
 <details>
-<summary>完整说明</summary>
+<summary><strong>Complete Documentation</strong></summary>
 
-（这里放你 README 中现有的 PIIN 全部说明，我会完整保留，只重新排版。）
+### 图片导入
+
+在库存页面上传图片即可将图片添加到网页图库。
+
+可以为图片填写：
+
+- 标题
+- 当前这一刻的想法
+- 图片下方的一句话
+
+用于长期收藏和记录。
+
+---
+
+### 图片整理
+
+收藏后的图片会自动按照：
+
+- 年份
+- 月份
+- 时间
+
+进行排序，方便日后回顾。
+
+---
+
+### 图片浏览
+
+进入观察页面即可查看所有图片。
+
+支持：
+
+- 左右方向键切换图片
+- 快速浏览全部收藏
+
+---
+
+### 灵感记录
+
+每张图片下方都可以撰写专属小说或记录灵感。
+
+图片不仅是收藏，也可以作为创作的起点。
+
+---
+
+### 动态主题
+
+网页整体色调会根据图片的主要颜色自动变化，使浏览体验更加统一。
+
+---
+
+### 数据存储
+
+所有信息均保存在浏览器 Local Storage 中。
 
 </details>
 
@@ -54,26 +111,98 @@
 
 # Infinite Star Final
 
-一个受到 Linux 与 macOS 启发的浏览器主页。
+一个受到 **Linux** 与 **macOS** 启发设计的浏览器主页。
 
-### 功能
+它更注重桌面的整体体验，而不是简单地把功能堆积在同一个页面。希望打开浏览器时，能够拥有一个安静、整洁、可以长期使用的起始页。
+
+### Features
+
+- Pomodoro Timer
+- Calendar
+- Weather
+- Music Player
+- Dock
+- Quick Launch
+- Desktop Widgets
+- Wallpaper Customization
+- Theme Customization
+- Local Storage
+
+![Infinite Star Screenshot](previews/infinite_star_station.png)
+
+<details>
+<summary><strong>Complete Documentation</strong></summary>
+
+### Desktop
+
+主页采用桌面布局设计，灵感来源于 Linux 与 macOS。
+
+支持：
+
+- 自定义壁纸
+- 模糊背景
+- 亮度调整
+- 饱和度调整
+- 桌面文字
+- 元素显示控制
+
+所有设置都会自动保存。
+
+---
+
+### Widgets
+
+包含多个常用组件，例如：
 
 - 番茄时钟
 - 日历
-- 顶部标签栏
-- 网站快捷启动
-- Dock
-- 自定义壁纸
-- 饱和度 / 模糊 / 亮度调节
-- 元素显示控制
-- 导入与导出配置
+- 天气
+- 时钟
+- 音乐播放器
 
-![Infinite Star](previews/infinite_star_station.png)
+所有模块均可独立显示或隐藏。
 
-<details>
-<summary>完整说明</summary>
+---
 
-（保留你原有关于设计理念、自定义功能及 Local Storage 的全部内容。）
+### Dock
+
+底部 Dock 用于快速启动常用网站。
+
+支持：
+
+- 自定义图标
+- 修改名称
+- 修改链接
+- 排序
+- 删除
+
+---
+
+### Theme
+
+可自由调整整个页面的视觉效果，包括：
+
+- 背景
+- 模糊
+- 透明度
+- 色彩
+- 桌面元素
+
+用于打造不同风格的主页。
+
+---
+
+### Import & Export
+
+支持导入与导出全部配置。
+
+更换浏览器或设备时，可快速恢复个人设置。
+
+---
+
+### Storage
+
+所有数据均保存在浏览器 Local Storage 中，不依赖服务器。
 
 </details>
 
@@ -81,24 +210,56 @@
 
 # Vocab Notebook Final
 
-用于单词背诵与测试。
+一个用于单词整理、记忆与测试的本地学习工具。
 
-### 功能
+它采用词库的形式管理单词，并提供多种测试方式，希望把背单词变成一个可以长期坚持的过程，而不是一次性的任务。
 
-- 多词库
-- 批量导入
-- 手动测试
-- 随机测试
-- 错题本
-- 排序
+### Features
+
+- Multiple Vocabulary Libraries
+- Batch Import
+- Manual Test
+- Random Test
+- Wrong Answer Notebook
 - Local Storage
 
-![Vocabulary](previews/words-test.png)
+![Vocab Notebook Screenshot](previews/words-test.png)
 
 <details>
-<summary>完整说明</summary>
+<summary><strong>Complete Documentation</strong></summary>
 
-（保留你现有全部使用说明，仅重新整理层级。）
+### Vocabulary Libraries
+
+支持创建多个独立词库，并可自由重命名、删除和排序。
+
+---
+
+### Import
+
+支持批量导入单词。
+
+---
+
+### Test
+
+提供：
+
+- 手动测试
+- 随机测试
+
+用于不同阶段的单词复习。
+
+---
+
+### Wrong Answer Notebook
+
+自动整理错题，方便重复练习。
+
+---
+
+### Storage
+
+所有数据均保存在浏览器 Local Storage 中。
 
 </details>
 
@@ -106,33 +267,65 @@
 
 # Flat Note Wall Inbox
 
-便签墙、聊天记录仪与链接收集器。
+一个用于记录想法、聊天内容与网页链接的轻量级信息整理工具。
 
-### 功能
+相比传统便签，它更偏向于长期的信息积累与快速检索。
 
-- 便签墙
-- 聊天记录
-- 链接收集
-- 拖拽布局
-- 删除管理
+### Features
 
-![Flat Note](previews/flat_note_book.png)
+- Sticky Notes
+- Chat Recorder
+- Link Collection
+- Drag & Drop
+- Local Storage
+
+![Flat Note Wall Screenshot](previews/flat_note_book.png)
 
 <details>
-<summary>完整说明</summary>
+<summary><strong>Complete Documentation</strong></summary>
 
-（保留你现有全部介绍。）
+### Sticky Notes
+
+创建多个便签，自由调整位置。
+
+---
+
+### Chat Recorder
+
+以聊天形式记录灵感或日常内容。
+
+---
+
+### Link Collection
+
+保存常用网页链接，便于后续整理。
+
+---
+
+### Storage
+
+所有数据均保存在浏览器 Local Storage 中。
 
 </details>
 
 ---
 
-## 后续计划
+## Future Plans
 
-- 持续完善现有项目
-- 优化界面体验
-- 增加新的创意网页作品
+这个仓库仍在持续更新。
+
+未来会继续加入新的创意网页作品，并持续优化现有项目的界面体验与交互设计。
 
 ---
 
-Made by **Alven**
+## License
+
+目前仅作为个人创意作品展示。
+
+如需参考其中的设计或代码，请注明来源。
+
+---
+
+Made with ❤️ by **Alven**
+
+Infinite Star Station Creative Files
